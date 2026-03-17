@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Code Obfuscator</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+        }
+
+        .glass-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 0;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: #00ffcc;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        select, textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #00ffcc;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            outline: none;
+            transition: border 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        select {
+            font-family: 'Segoe UI', sans-serif;
+            cursor: pointer;
+            appearance: none;
+        }
+
+        select option {
+            background: #203a43;
+            color: #fff;
+        }
+
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        select:focus, textarea:focus {
+            border-color: #00ffcc;
+        }
+
+        textarea::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        button {
+            background: linear-gradient(135deg, #00b4db, #0083b0);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            flex: 1;
+            max-width: 250px;
+        }
+
+        .btn-copy {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glass-container">
+        <h2>🛡️ Secured Code With RiFAT</h2>
+        <div class="input-group">
+            <select id="codeType">
+                <option value="html">HTML (Full Page Code)</option>
+                <option value="css">CSS (Only Stylesheet)</option>
+                <option value="js">JavaScript (Only JS Code)</option>
+            </select>
+
+            <textarea id="rawCode" placeholder="আপনার আসল কোড এখানে পেস্ট করুন..."></textarea>
+            
+            <div class="btn-group">
+                <button onclick="encryptCode()">Obfuscate Code</button>
+                <button class="btn-copy" onclick="copyCode()">Copy Output</button>
+            </div>
+            
+            <textarea id="outputCode" placeholder="আপনার সুরক্ষিত (Obfuscated) কোড এখানে আসবে..." readonly></textarea>
+        </div>
+    </div>
+
+    <script>
+        function encryptCode() {
+            const type = document.getElementById('codeType').value;
+            const input = document.getElementById('rawCode').value;
+            
+            if (!input.trim()) {
+                alert("দয়া করে কিছু কোড দিন!");
+                return;
+            }
+
+            try {
+                const base64Str = window.btoa(unescape(encodeURIComponent(input)));
+                
+                let hexStr = '';
+                for (let i = 0; i < base64Str.length; i++) {
+                    let hex = base64Str.charCodeAt(i).toString(16);
+                    hexStr += (hex.length === 1 ? '0' + hex : hex);
+                }
+
+                const noiseChars = 'ghijklmnopqrstuvwxyz';
+                let noisyHex = '';
+                for (let i = 0; i < hexStr.length; i += 2) {
+                    noisyHex += hexStr.substr(i, 2);
+                    if (Math.random() > 0.5) {
+                        noisyHex += noiseChars.charAt(Math.floor(Math.random() * noiseChars.length));
+                    }
+                }
+
+                let finalCode = '';
+
+                if (type === 'html') {
+                    finalCode = `<!DOCTYPE html>\n<html>\n<head>\n<meta charset="UTF-8">\n</head>\n<body>\n<script>\n(function(){\nvar _d="${noisyHex}";\ntry{\nvar c=_d.replace(/[^0-9a-f]/gi,"");\nvar b="";\nfor(var i=0;i<c.length;i+=2)b+=String.fromCharCode(parseInt(c.substr(i,2),16));\nvar h=decodeURIComponent(escape(window.atob(b)));\ndocument.open();document.write(h);document.close();\n}catch(e){}\n})();\n<\/script>\n</body>\n</html>`;
+                } 
+                else if (type === 'css') {
+                    finalCode = `<script>\n(function(){\nvar _d="${noisyHex}";\ntry{\nvar c=_d.replace(/[^0-9a-f]/gi,"");\nvar b="";\nfor(var i=0;i<c.length;i+=2)b+=String.fromCharCode(parseInt(c.substr(i,2),16));\nvar s=decodeURIComponent(escape(window.atob(b)));\nvar t=document.createElement('style');\nt.innerHTML=s;\ndocument.head.appendChild(t);\n}catch(e){}\n})();\n<\/script>`;
+                } 
+                else if (type === 'js') {
+                    finalCode = `<script>\n(function(){\nvar _d="${noisyHex}";\ntry{\nvar c=_d.replace(/[^0-9a-f]/gi,"");\nvar b="";\nfor(var i=0;i<c.length;i+=2)b+=String.fromCharCode(parseInt(c.substr(i,2),16));\nvar j=decodeURIComponent(escape(window.atob(b)));\neval(j);\n}catch(e){}\n})();\n<\/script>`;
+                }
+
+                document.getElementById('outputCode').value = finalCode;
+                
+            } catch (error) {
+                alert("কোড এনক্রিপ্ট করার সময় একটি ত্রুটি হয়েছে!");
+            }
+        }
+
+        function copyCode() {
+            const outputArea = document.getElementById('outputCode');
+            if (!outputArea.value) {
+                alert("কপি করার মতো কোনো কোড নেই!");
+                return;
+            }
+            outputArea.select();
+            document.execCommand('copy');
+            alert("কোড সফলভাবে কপি করা হয়েছে!");
+        }
+    </script>
+</body>
+</html>
